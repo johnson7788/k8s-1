@@ -1,6 +1,9 @@
 使用Ansible Playbook进行生产级别高可用kubernetes集群部署，包含初始化系统配置、自动签发集群证书、安装配置etcd集群、安装配置haproxy及keepalived等，并使用bootstrap方式认证以及kubernetes组件健康检查。另外支持集群节点扩容、替换集群证书、kubernetes版本升级等。本Playbook使用二进制方式部署。
 
 
+### 1.0 关闭selinux, firewalled
+sed -i -e 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+systemctl stop firewalld.service
 
 ## 一、准备文件服务器
 
@@ -28,12 +31,14 @@ yum -y install nginx
 将文件拷贝nginx目录
 
 ```
+cd package
 tar zxvf kubernetes-server-linux-amd64.tar.gz
 cp kubernetes/server/bin/{kube-apiserver,kube-controller-manager,kube-scheduler,kubectl,kubelet,kube-proxy} /usr/share/nginx/html/
 ```
 启动服务
 ```
 systemctl start nginx
+systemctl enable nginx
 ```
 
 
@@ -143,8 +148,6 @@ docker数据盘
 ```
 ansible-playbook fdisk.yml -i inventory -l master,node -e "disk=sdb dir=/var/lib/docker"
 ```
-
-
 
 ### 3.3、部署集群
 

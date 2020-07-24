@@ -1,27 +1,23 @@
 #本组内填写etcd服务器及主机名
 [etcd]
-172.16.100.201 hostname=etcd-01
-172.16.100.202 hostname=etcd-02
-172.16.100.203 hostname=etcd-03
+192.168.31.13 hostname=etcd-01
+192.168.31.14 hostname=etcd-02
+192.168.31.15 hostname=etcd-03
 
 #本组内填写master服务器及主机名
 [master]
-172.16.100.204 hostname=master-01
-172.16.100.205 hostname=master-02
-172.16.100.206 hostname=master-03
+192.168.31.13 hostname=master-01
+192.168.31.14 hostname=master-02
+192.168.31.15 hostname=master-03
 
 [haproxy]
-172.16.100.198 hostname=haproxy-01 type=MASTER priority=100
-172.16.100.199 hostname=haproxy-02 type=BACKUP priority=90
+192.168.31.14 hostname=haproxy-01 type=MASTER priority=100
+192.168.31.15 hostname=haproxy-02 type=BACKUP priority=90
 [all:vars]
 lb_port=6443
-vip=172.16.100.200
+vip=192.168.31.18
 
 #本组内填写node服务器及主机名
 [node]
-172.16.100.207 hostname=node-01
-172.16.100.208 hostname=node-02
-172.16.100.209 hostname=node-03
+192.168.31.12 hostname=node-01
 
-
-ansible_python_interpreter
