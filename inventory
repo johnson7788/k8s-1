@@ -22,3 +22,6 @@ vip=172.16.100.200
 172.16.100.207 hostname=node-01
 172.16.100.208 hostname=node-02
 172.16.100.209 hostname=node-03
+
+
+ansible_python_interpreter

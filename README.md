@@ -8,6 +8,9 @@
 
 ```
 wget https://storage.googleapis.com/kubernetes-release/release/v1.16.10/kubernetes-server-linux-amd64.tar.gz
+wget https://dl.k8s.io/v1.18.0/kubernetes-client-linux-amd64.tar.gz
+wget https://dl.k8s.io/v1.18.0/kubernetes-node-linux-amd64.tar.gz
+wget https://dl.k8s.io/v1.18.0/kubernetes-server-linux-amd64.tar.gz
 ```
 
 - url中v1.16.10替换为需要下载的版本即可。
@@ -79,6 +82,10 @@ vip=172.16.100.200
 - 当haproxy和kube-apiserver部署在同一台服务器时，请将`lb_port`修改为其他不冲突的端口。
 
 
+repo 拷贝
+ansible -i inventory all  -m copy -a  "src=docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo"
+ansible -i inventory all  -m copy -a  "src=epel-release-latest-7.noarch.rpm dest=/tmp/"
+ansible -i inventory all  -m raw -a 'yum -y localinstall /tmp/epel-release-latest-7.noarch.rpm'
 
 ### 2.3、配置集群安装信息
 
@@ -115,7 +122,8 @@ vip=172.16.100.200
 
 ```
 yum -y install ansible
-pip install netaddr -i https://mirrors.aliyun.com/pypi/simple/
+yum install python36
+pip3 install netaddr -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
 
@@ -143,6 +151,8 @@ ansible-playbook fdisk.yml -i inventory -l master,node -e "disk=sdb dir=/var/lib
 ```
 ansible-playbook k8s.yml -i inventory
 ```
+
+ansible-playbook  -i inventory k8s.yml  --start-at-task="创建ssl证书目录"
 
 - 成功执行结束后，既kubernetes集群部署成功。
 - 后续部署其他基础插件可以参考[部署集群插件](https://www.k8sre.com/#/kubernetes/2.1.binary?id=%e5%8d%81%e3%80%81%e9%83%a8%e7%bd%b2%e9%9b%86%e7%be%a4%e6%8f%92%e4%bb%b6)。
