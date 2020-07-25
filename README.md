@@ -7,8 +7,8 @@ systemctl stop firewalld.service
 关掉swap，要不启动失败
 swapoff -a
 vim /etc/fstab
-ansible -i inventory all  -m copy -a  "src=docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo"
-ansible -i inventory all  -m copy -a  "src=epel-release-latest-7.noarch.rpm dest=/tmp/"
+ansible -i inventory all  -m copy -a  "src=repo/docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo"
+ansible -i inventory all  -m copy -a  "src=repo/epel-release-latest-7.noarch.rpm dest=/tmp/"
 ansible -i inventory all  -m raw -a 'yum -y localinstall /tmp/epel-release-latest-7.noarch.rpm'
 
 ## 一、准备文件服务器
