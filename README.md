@@ -1,9 +1,15 @@
 使用Ansible Playbook进行生产级别高可用kubernetes集群部署，包含初始化系统配置、自动签发集群证书、安装配置etcd集群、安装配置haproxy及keepalived等，并使用bootstrap方式认证以及kubernetes组件健康检查。另外支持集群节点扩容、替换集群证书、kubernetes版本升级等。本Playbook使用二进制方式部署。
 
 
-### 1.0 关闭selinux, firewalled
+### 准备环境: 关闭selinux, firewalld repo 拷贝
 sed -i -e 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 systemctl stop firewalld.service
+关掉swap，要不启动失败
+swapoff -a
+vim /etc/fstab
+ansible -i inventory all  -m copy -a  "src=docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo"
+ansible -i inventory all  -m copy -a  "src=epel-release-latest-7.noarch.rpm dest=/tmp/"
+ansible -i inventory all  -m raw -a 'yum -y localinstall /tmp/epel-release-latest-7.noarch.rpm'
 
 ## 一、准备文件服务器
 
@@ -52,7 +58,6 @@ git clone https://github.com/k8sre/k8s.git
 ```
 
 
-
 ### 2.2、配置inventory
 
 请按照inventory模板格式修改对应资源
@@ -87,11 +92,6 @@ vip=172.16.100.200
 - 当haproxy和kube-apiserver部署在同一台服务器时，请将`lb_port`修改为其他不冲突的端口。
 
 
-repo 拷贝
-ansible -i inventory all  -m copy -a  "src=docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo"
-ansible -i inventory all  -m copy -a  "src=epel-release-latest-7.noarch.rpm dest=/tmp/"
-ansible -i inventory all  -m raw -a 'yum -y localinstall /tmp/epel-release-latest-7.noarch.rpm'
-
 ### 2.3、配置集群安装信息
 
 编辑group_vars/all.yml文件，填入自己的配置
@@ -101,7 +101,7 @@ ansible -i inventory all  -m raw -a 'yum -y localinstall /tmp/epel-release-lates
 | ssl_dir               | 签发ssl证书保存路径，ansible控制端机器上的路径。默认签发10年有效期的证书 |
 | kubernetes_url        | kubernetes 二进制文件下载链接，请修改为自己的下载服务器地址  |
 | docker_version        | 可通过查看版本yum list docker-ce --showduplicates\|sort -rn  |
-| apiserver_domain_name | kube-apiserver的访问域名，需提前配置解析。不使用域名时，可以指定为负载均衡的IP（本Playbook需指定为haproxy的VIP） |
+| apiserver_domain_name | kube-apiserver的访问域名，需提前配置解析。不使用域名时，可以指定为负载均衡的IP（本Playbook需指定为haproxy的VIP）, 加到hosts文件 |
 | service_ip_range      | 指定k8s集群service的网段                                     |
 | pod_ip_range          | 指定k8s集群pod的网段                                         |
 | calico_ipv4pool_ipip  | 指定k8s集群使用calico的ipip模式或者bgp模式，Always为ipip模式，off为bgp模式。注意bgp模式不适用于公有云环境。当值为off的时候，切记使用引号`""`引起来。 |
@@ -127,8 +127,7 @@ ansible -i inventory all  -m raw -a 'yum -y localinstall /tmp/epel-release-lates
 
 ```
 yum -y install ansible
-yum install python36
-pip3 install netaddr -i https://mirrors.aliyun.com/pypi/simple/
+pip install netaddr -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
 
@@ -152,6 +151,7 @@ ansible-playbook fdisk.yml -i inventory -l master,node -e "disk=sdb dir=/var/lib
 ### 3.3、部署集群
 
 ```
+ansible -i inventory all -m ping
 ansible-playbook k8s.yml -i inventory
 ```
 
